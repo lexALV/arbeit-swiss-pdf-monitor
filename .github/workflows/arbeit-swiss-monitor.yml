@@ -1,0 +1,160 @@
+name: arbeit.swiss-PDF-Monitor veröffentlichen
+
+on:
+  schedule:
+    - cron: "37 6 * * *"
+      timezone: "Europe/Zurich"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  actions: read
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: arbeit-swiss-github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Publikationsseiten und PDFs prüfen
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      has_changes: ${{ steps.decision.outputs.has_changes }}
+      should_deploy: ${{ steps.decision.outputs.should_deploy }}
+      update_state: ${{ steps.decision.outputs.update_state }}
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v6
+
+      - name: Python einrichten
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Tests ausführen
+        run: python -m unittest discover -s tests -v
+
+      - name: PDF-Fingerabdrücke und Dateien erzeugen
+        run: python monitor.py
+
+      - name: Veröffentlichung entscheiden
+        id: decision
+        shell: bash
+        run: |
+          set -euo pipefail
+          source state-next/workflow-output.txt
+
+          should_deploy=false
+          update_state=false
+          if [[ "$has_changes" == "true" || "$baseline_exists" == "false" ]]; then
+            should_deploy=true
+            update_state=true
+          elif [[ "$GITHUB_EVENT_NAME" != "schedule" ]]; then
+            should_deploy=true
+          fi
+
+          echo "has_changes=$has_changes" >> "$GITHUB_OUTPUT"
+          echo "should_deploy=$should_deploy" >> "$GITHUB_OUTPUT"
+          echo "update_state=$update_state" >> "$GITHUB_OUTPUT"
+
+      - name: GitHub Pages konfigurieren
+        if: ${{ steps.decision.outputs.should_deploy == 'true' }}
+        uses: actions/configure-pages@v6
+
+      - name: Statische Dateien hochladen
+        if: ${{ steps.decision.outputs.should_deploy == 'true' }}
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Neuen Vergleichszustand zwischenspeichern
+        if: ${{ steps.decision.outputs.update_state == 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: monitor-state
+          path: state-next
+          retention-days: 2
+
+  deploy:
+    name: GitHub Pages veröffentlichen
+    needs: build
+    if: ${{ needs.build.outputs.should_deploy == 'true' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: GitHub Pages veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  maintenance:
+    name: Vergleichszustand und Zeitplan pflegen
+    needs:
+      - build
+      - deploy
+    if: >-
+      ${{
+        always() &&
+        needs.build.result == 'success' &&
+        (needs.deploy.result == 'success' || needs.deploy.result == 'skipped') &&
+        (github.event_name == 'schedule' || needs.build.outputs.update_state == 'true')
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Neuen Vergleichszustand herunterladen
+        if: ${{ needs.build.outputs.update_state == 'true' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: monitor-state
+          path: state-next
+
+      - name: Vergleichszustand übernehmen
+        if: ${{ needs.build.outputs.update_state == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p state
+          cp state-next/manifest.json state/manifest.json
+          cp state-next/last_changes.json state/last_changes.json
+
+      - name: Monatliche Repository-Aktivität sicherstellen
+        if: ${{ github.event_name == 'schedule' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          month="$(date -u +'%Y-%m')"
+          file=".github/monitor-heartbeat.txt"
+
+          if grep -Fxq "$month" "$file"; then
+            echo "Wartungsaktivität für $month ist bereits vorhanden."
+          else
+            printf '%s\n' "$month" > "$file"
+          fi
+
+      - name: Zustandsänderungen sichern
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state .github/monitor-heartbeat.txt
+          if git diff --cached --quiet; then
+            echo "Keine Zustandsänderung zu sichern."
+            exit 0
+          fi
+          git commit -m "Monitor-Zustand automatisch aktualisieren [skip ci]"
+          git push origin main

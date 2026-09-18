@@ -1,0 +1,33 @@
+{
+  "output_dir": "site",
+  "state_dir": "state",
+  "next_state_dir": "state-next",
+  "timeout_seconds": 120,
+  "max_attempts": 4,
+  "max_workers": 3,
+  "max_pdf_megabytes": 250,
+  "user_agent": "lexALV-arbeit-swiss-PDF-monitor/1.0",
+  "sources": [
+    {
+      "language": "de",
+      "url": "https://www.arbeit.swiss/de/informationszentrum/publikationen",
+      "directives_heading": "Weisungen / AVIG-Praxis / Richtlinien",
+      "audit_heading": "Audit Letter",
+      "end_heading": "Berichte und Studien"
+    },
+    {
+      "language": "fr",
+      "url": "https://www.arbeit.swiss/fr/centre-dinformation/publications",
+      "directives_heading": "Directives / Bulletins LACI / Lignes directrices",
+      "audit_heading": "Audit Letter",
+      "end_heading": "Rapports et études"
+    },
+    {
+      "language": "it",
+      "url": "https://www.arbeit.swiss/it/centro-dinformazione/pubblicazioni",
+      "directives_heading": "Direttive / Prassi LADI / Linee guida",
+      "audit_heading": "Audit Letter",
+      "end_heading": "Rapporti e studi"
+    }
+  ]
+}
