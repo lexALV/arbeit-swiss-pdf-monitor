@@ -117,17 +117,17 @@
     "pdf_url": "https://www.arbeit.swiss/api/media/fileservice/sdweb-docs-prod-arbeitswiss-files/files/2026/08/27/489baf54-8c7b-4f94-92e5-65d7e6f0ee6b.pdf"
   },
   {
-    "identity": "de\u001fweisungen\u001fweisung avg öav.pdf",
+    "identity": "de\u001fweisungen\u001fweisung avg öav.pdf",
     "language": "de",
     "category": "Weisungen",
     "title": "Weisung AVG öAV (AVG-Praxis öAV) gültig ab 1.7.2025",
     "displayed_date": "25.06.2025",
-    "link_date": "2026-06-03",
-    "download_name": "Weisung AVG öAV.pdf",
-    "pdf_id": "cc8c283d-0400-4c14-8359-10823cada5b3",
+    "link_date": "2026-10-14",
+    "download_name": "Weisung AVG öAV.pdf",
+    "pdf_id": "02d04657-c585-4c4f-ae3e-ce7257ccb5e0",
     "size_bytes": 422167,
     "sha256": "4ba395005c821082f9ca71c00cfc4a30af7dc0ed3104d0516ebcb6d7ff167d3e",
-    "pdf_url": "https://www.arbeit.swiss/api/media/fileservice/sdweb-docs-prod-arbeitswiss-files/files/2026/06/03/cc8c283d-0400-4c14-8359-10823cada5b3.pdf"
+    "pdf_url": "https://www.arbeit.swiss/api/media/fileservice/sdweb-docs-prod-arbeitswiss-files/files/2026/10/14/02d04657-c585-4c4f-ae3e-ce7257ccb5e0.pdf"
   },
   {
     "identity": "de\u001fweisungen\u001fweisung avig ale.pdf",

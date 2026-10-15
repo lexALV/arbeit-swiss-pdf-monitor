@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "change_type": "Entfernt",
+    "identity": "de\u001fweisungen\u001fweisung avg öav.pdf",
+    "language": "de",
+    "category": "Weisungen",
+    "title": "Weisung AVG öAV (AVG-Praxis öAV) gültig ab 1.7.2025",
+    "pdf_url": "",
+    "changed_fields": [
+      "Dokument entfernt"
+    ],
+    "downloadable": false
+  },
+  {
+    "change_type": "Neu",
+    "identity": "de\u001fweisungen\u001fweisung avg öav.pdf",
+    "language": "de",
+    "category": "Weisungen",
+    "title": "Weisung AVG öAV (AVG-Praxis öAV) gültig ab 1.7.2025",
+    "pdf_url": "https://www.arbeit.swiss/api/media/fileservice/sdweb-docs-prod-arbeitswiss-files/files/2026/10/14/02d04657-c585-4c4f-ae3e-ce7257ccb5e0.pdf",
+    "changed_fields": [
+      "Neues Dokument"
+    ],
+    "downloadable": true
+  }
+]
